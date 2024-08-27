@@ -1,0 +1,40 @@
+---
+// You can add any necessary imports or Astro-specific code here
+---
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Worker Test</title>
+</head>
+<body>
+    <h1>Hello, Service Worker!</h1>
+    <button id="update-check">Check for updates</button>
+    <div id="status"></div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const updateButton = document.getElementById('update-check');
+        const statusDiv = document.getElementById('status');
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                updateButton?.addEventListener('click', () => {
+                    registration.update().then(() => {
+                        statusDiv!.textContent = 'Service Worker update checked.';
+                    });
+                });
+            });
+
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                statusDiv!.textContent = 'New Service Worker activated. Reloading...';
+                window.location.reload();
+            });
+        } else {
+            statusDiv!.textContent = 'Service Workers are not supported in this browser.';
+        }
+      });
+    </script>
+</body>
+</html>

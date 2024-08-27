@@ -1,0 +1,51 @@
+{
+  "name": "astro-service-worker",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachhandley/astro-service-worker.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "astro dev",
+    "build": "tsup",
+    "deploy": "bun run build && npm publish --access public",
+    "test": "vitest"
+  },
+  "keywords": [
+    "astro-integration",
+    "astro",
+    "service",
+    "worker"
+  ],
+  "peerDependencies": {
+    "astro": "^4.0.0"
+  },
+  "dependencies": {
+    "workbox-build": "^7.1.0",
+    "workbox-window": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.8",
+    "@types/node": "^20.10.5",
+    "astro": "^4.0.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
