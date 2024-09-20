@@ -7,7 +7,6 @@ import { generateSW, type GenerateSWOptions } from "workbox-build";
 const SW_NAME = "service-worker.js";
 
 interface UserOptions {
-  enableInDevelopment?: boolean;
   customServiceWorker?: string;
 }
 
@@ -17,12 +16,7 @@ export default function astroServiceWorker(
 ): AstroIntegration {
   let config: AstroConfig;
 
-  const defaultUserOptions: UserOptions = {
-    enableInDevelopment: false,
-  };
-
   const mergedUserOptions: UserOptions = {
-    ...defaultUserOptions,
     ...userOptions,
   };
 
@@ -106,8 +100,7 @@ export default function astroServiceWorker(
       "astro:config:setup": async ({ config: cfg, injectScript, command }) => {
         config = cfg;
         const swPath = path.join(config.base, SW_NAME);
-        const publicDir = fileURLToPath(config.publicDir);
-        const swDest = path.join(publicDir, SW_NAME);
+        const isDev = command === "dev";
 
         injectScript(
           "head-inline",
@@ -124,9 +117,9 @@ if ('serviceWorker' in navigator) {
           `
         );
 
-        const isDevelopment = command === "dev";
-        if (isDevelopment && !mergedUserOptions.enableInDevelopment) {
-          // Use noop service worker in development
+        if (isDev) {
+          const publicDir = fileURLToPath(config.publicDir);
+          const swDest = path.join(publicDir, SW_NAME);
           const noopServiceWorkerContent = `
             // This is a noop service worker for development
             self.addEventListener('install', () => self.skipWaiting());
@@ -135,24 +128,18 @@ if ('serviceWorker' in navigator) {
           await fs.mkdir(path.dirname(swDest), { recursive: true });
           await fs.writeFile(swDest, noopServiceWorkerContent, "utf-8");
           console.log("Created noop service worker for development");
-        } else if (isDevelopment && mergedUserOptions.enableInDevelopment) {
-          // Generate service worker for development
-          try {
-            const result = await generateSW({
-              ...mergedWorkboxConfig,
-              swDest,
-              globDirectory: publicDir,
-            });
-            console.log("Generated service worker for development:", result);
-          } catch (error) {
-            console.error("Error generating service worker:", error);
-          }
         }
-        // For production, we'll generate the service worker in the build:done hook
       },
       "astro:build:done": async ({ dir }) => {
         const outDir = fileURLToPath(dir);
         const swDest = path.join(outDir, SW_NAME);
+
+        // Remove any existing service worker file
+        try {
+          await fs.unlink(swDest);
+        } catch (error) {
+          // Ignore if file doesn't exist
+        }
 
         try {
           if (mergedUserOptions.customServiceWorker) {
