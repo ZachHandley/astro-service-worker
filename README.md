@@ -69,5 +69,6 @@ MIT
 
 ## Changelog
 
+- 0.0.3: Fix it putting the service worker into the public folder, only puts it into dist now
 - 0.0.2: Fix README lol
 - 0.0.1: Publish
